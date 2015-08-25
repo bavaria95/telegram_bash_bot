@@ -12,3 +12,5 @@ Nokogiri::HTML(open(url)).css("div[class='quote']").map{ |x|
 			children.map{|s| s.name == 'br' ? '\n' : s.text}.join
 }
 quotes.delete nil
+
+p quotes['435327']
