@@ -3,7 +3,8 @@
 require 'sinatra'
 require 'open-uri'
 require 'nokogiri'
-require 'json'
+require 'oj'
+
 
 def parse_quotes url
 
@@ -20,9 +21,9 @@ end
 
 get '/random' do 
 	quotes = parse_quotes("http://bash.im/random")
-	quotes[quotes.keys.sample].to_json
+	Oj.dump(quotes[quotes.keys.sample])
 end
 
 get '/today' do
-	parse_quotes("http://bash.im/best").to_json
+	Oj.dump(parse_quotes("http://bash.im/best"))
 end
