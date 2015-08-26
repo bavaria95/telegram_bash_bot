@@ -3,6 +3,7 @@
 require 'sinatra'
 require 'open-uri'
 require 'nokogiri'
+require 'json'
 
 def get_random_quote
 
@@ -31,10 +32,10 @@ def get_todays_quotes
 	}
 	quotes.delete nil
 
-	# quotes
+	quotes
 end
 
 
 get '/random' do 
-	get_todays_quotes
+	get_todays_quotes.to_json
 end
