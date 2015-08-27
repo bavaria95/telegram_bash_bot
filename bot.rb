@@ -68,6 +68,13 @@ Telegram::Bot::Client.run(token) do |bot|
 			reply_markup: custom_keyboard(redis, message.chat.id))
 		end
 
+	when '/help'
+		bot.api.sendMessage(chat_id: message.chat.id, text: "You can subscribe for daily digest of latest quotes from bash.im" + 
+			"(bash.org.ru in the past) or to get some random quote from this portal. \n\nFull list of available commands:\n" +
+			"/help - get some information about bot\n" + 
+			"/unsubscribe - cancel your subscription",
+			reply_markup: custom_keyboard(redis, message.chat.id))
+
 	else
 		bot.api.sendMessage(chat_id: message.chat.id, text: "Unrecognized command.", 
 			reply_markup: custom_keyboard(redis, message.chat.id))
