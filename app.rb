@@ -8,10 +8,10 @@ require 'oj'
 
 def parse_quotes url
 
-	quotes = {}
+	quotes = []
 
 	Nokogiri::HTML(open(url)).css("div[class='quote']").map{ |x| 
-		quotes[x.css("div.actions a.id").children.text[1..-1]] = x.css("div[class='text']").
+		quotes << x.css("div[class='text']").
 				children.map{|s| s.name == 'br' ? "\n" : s.text}.join
 	}
 	quotes.delete nil
@@ -21,7 +21,8 @@ end
 
 get '/random' do 
 	quotes = parse_quotes("http://bash.im/random")
-	Oj.dump(quotes[quotes.keys.sample])
+
+	Oj.dump(quotes.sample)
 end
 
 get '/today' do
