@@ -19,8 +19,13 @@ Telegram::Bot::Client.run(token) do |bot|
       bot.api.sendMessage(chat_id: message.chat.id, text: Oj.load(open("http://127.0.0.1:4567/random").read))
     
     when '/subscribe'
-    	redis.sadd('users', message.chat.id)
-    	File.open('users.dat', 'a+') { |file| file.write("OK: ADD #{message.chat.id}\n") }
+    	chat_id = message.chat.id
+    	if redis.sismember('users', chat_id)
+    		bot.api.sendMessage(chat_id: message.chat.id, text: "You are already subscribed")
+    	else
+    		redis.sadd('users', chat_id)
+    		File.open('users.dat', 'a+') { |file| file.write("OK: ADD #{chat_id}\n") }
+    	end
 
 	else
 		bot.api.sendMessage(chat_id: message.chat.id, text: "Unrecognized command")
