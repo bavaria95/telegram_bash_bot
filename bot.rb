@@ -55,8 +55,25 @@ Telegram::Bot::Client.run(token) do |bot|
 			bot.api.sendMessage(chat_id: chat_id, text: "You are already subscribed.",
 				reply_markup: custom_keyboard(redis, message.chat.id))
 		end
+
+	when '/unsubscribe'
+		chat_id = message.chat.id
+		unless redis.sismember('users', chat_id)
+			bot.api.sendMessage(chat_id: chat_id, text: "You aren't subscribed yet.",
+				reply_markup: custom_keyboard(redis, message.chat.id))
+		else
+			if redis.srem('users', chat_id)
+				bot.api.sendMessage(chat_id: chat_id, 
+						text: "You have been successfully unsubscribed.",
+						reply_markup: custom_keyboard(redis, message.chat.id))
+			else
+				bot.api.sendMessage(chat_id: chat_id, text: "You aren't subscribed yet.",
+				reply_markup: custom_keyboard(redis, message.chat.id))
+			end
+		end
+
 	else
-		bot.api.sendMessage(chat_id: message.chat.id, text: "Unrecognized command", 
+		bot.api.sendMessage(chat_id: message.chat.id, text: "Unrecognized command.", 
 			reply_markup: custom_keyboard(redis, message.chat.id))
 	end
   end
