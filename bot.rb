@@ -35,8 +35,7 @@ Telegram::Bot::Client.run(token) do |bot|
     case message.text
 
     when '/start'
-      	bot.api.sendMessage(chat_id: message.chat.id, text: "Welcome to our Bash bot!\n" +
-      		"You can subscribe here on daily digest of quotes or request random quote.", 
+      	bot.api.sendMessage(chat_id: message.chat.id, text: "Welcome to our Bash bot!", 
       		reply_markup: custom_keyboard(redis, message.chat.id))
     
     when 'Random'
