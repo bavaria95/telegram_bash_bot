@@ -7,9 +7,11 @@ require 'oj'
 require 'redis'
 
 token = File.read('token.dat')
+host = "pub-redis-16230.us-east-1-4.6.ec2.redislabs.com"
+port = 16230
 redis_pass = File.read('redis_pass.dat')
 
-redis = Redis.new(:host => "pub-redis-16230.us-east-1-4.6.ec2.redislabs.com", :port => 16230, :password => redis_pass)
+redis = Redis.new(:host => host, :port => port, :password => redis_pass)
 
 Telegram::Bot::Client.run(token) do |bot|
   bot.listen do |message|
