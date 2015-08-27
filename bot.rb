@@ -50,7 +50,7 @@ Telegram::Bot::Client.run(token) do |bot|
 		if redis.sadd('users', chat_id)
 			bot.api.sendMessage(chat_id: chat_id, text: "You have been successfully subscribed.", 
 				reply_markup: custom_keyboard(redis, message.chat.id))
-			File.open('users.dat', 'a+') { |file| file.write("OK: ADD #{chat_id}\n") }
+			File.open('users.dat', 'a+') { |file| file.write("#{Time.now} -- OK: ADD #{chat_id}\n") }
 		else
 			bot.api.sendMessage(chat_id: chat_id, text: "You are already subscribed.",
 				reply_markup: custom_keyboard(redis, message.chat.id))
@@ -62,7 +62,7 @@ Telegram::Bot::Client.run(token) do |bot|
 			bot.api.sendMessage(chat_id: chat_id, 
 					text: "You have been successfully unsubscribed.",
 					reply_markup: custom_keyboard(redis, message.chat.id))
-			File.open('users.dat', 'a+') { |file| file.write("OK: DEL #{chat_id}\n") }
+			File.open('users.dat', 'a+') { |file| file.write("#{Time.now} -- OK: DEL #{chat_id}\n") }
 		else
 			bot.api.sendMessage(chat_id: chat_id, text: "You aren't subscribed yet.",
 			reply_markup: custom_keyboard(redis, message.chat.id))
