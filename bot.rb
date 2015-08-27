@@ -6,14 +6,6 @@ require 'telegram/bot'
 require 'oj'
 require 'redis'
 
-token = File.read('token.dat')
-host = "pub-redis-16230.us-east-1-4.6.ec2.redislabs.com"
-port = 16230
-redis_pass = File.read('redis_pass.dat')
-
-redis = Redis.new(:host => host, :port => port, :password => redis_pass)
-
-
 def custom_keyboard(redis, id)
 	if redis.sismember('users', id)
 			hints = Telegram::Bot::Types::ReplyKeyboardMarkup
@@ -25,6 +17,17 @@ def custom_keyboard(redis, id)
 
 	hints
 end
+
+def parse_url url
+	Oj.load(open(url).read)
+end
+
+token = File.read('token.dat')
+host = "pub-redis-16230.us-east-1-4.6.ec2.redislabs.com"
+port = 16230
+redis_pass = File.read('redis_pass.dat')
+
+redis = Redis.new(:host => host, :port => port, :password => redis_pass)
 
 
 Telegram::Bot::Client.run(token) do |bot|
@@ -38,25 +41,19 @@ Telegram::Bot::Client.run(token) do |bot|
     
     when 'Random'
       	bot.api.sendMessage(chat_id: message.chat.id, reply_markup: custom_keyboard(redis, message.chat.id), 
-      		text: Oj.load(open("http://127.0.0.1:4567/random").read))
+      		text: parse_url("http://127.0.0.1:4567/random"))
     
 	when 'Subscribe'
 		chat_id = message.chat.id
-		if redis.sismember('users', chat_id)
-			bot.api.sendMessage(chat_id: chat_id, text: "You are already subscribed.",
-			 reply_markup: custom_keyboard(redis, message.chat.id))
-		else
-			if redis.sadd('users', chat_id)
-				bot.api.sendMessage(chat_id: chat_id, text: "You have been successfully subscribed.", 
-					reply_markup: custom_keyboard(redis, message.chat.id))
-				File.open('users.dat', 'a+') { |file| file.write("OK: ADD #{chat_id}\n") }
-			else
-				bot.api.sendMessage(chat_id: chat_id, text: "Sorry, but something went wrong on our end.",
-					reply_markup: custom_keyboard(redis, message.chat.id))
-				File.open('users.dat', 'a+') { |file| file.write("ERROR: ADD #{chat_id}\n") }
-			end
-		end
 
+		if redis.sadd('users', chat_id)
+			bot.api.sendMessage(chat_id: chat_id, text: "You have been successfully subscribed.", 
+				reply_markup: custom_keyboard(redis, message.chat.id))
+			File.open('users.dat', 'a+') { |file| file.write("OK: ADD #{chat_id}\n") }
+		else
+			bot.api.sendMessage(chat_id: chat_id, text: "You are already subscribed.",
+				reply_markup: custom_keyboard(redis, message.chat.id))
+		end
 	else
 		bot.api.sendMessage(chat_id: message.chat.id, text: "Unrecognized command", 
 			reply_markup: custom_keyboard(redis, message.chat.id))
