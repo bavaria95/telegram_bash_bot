@@ -16,11 +16,17 @@ redis = Redis.new(:host => host, :port => port, :password => redis_pass)
 Telegram::Bot::Client.run(token) do |bot|
   bot.listen do |message|
     case message.text
+
+    when '/start'
+    	hints = Telegram::Bot::Types::ReplyKeyboardMarkup
+      		.new(keyboard: [%w(Subscribe), %w(Random)])
+      	bot.api.sendMessage(chat_id: message.chat.id, text: "Welcome to our Bash bot!\n" +
+      		"You can subscribe here on daily digest of quotes or request random quote.", reply_markup: hints)
     
-    when '/random'
+    when 'Random'
       bot.api.sendMessage(chat_id: message.chat.id, text: Oj.load(open("http://127.0.0.1:4567/random").read))
     
-    when '/subscribe'
+    when 'Subscribe'
     	chat_id = message.chat.id
     	if redis.sismember('users', chat_id)
     		bot.api.sendMessage(chat_id: chat_id, text: "You are already subscribed.")
