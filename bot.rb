@@ -58,18 +58,14 @@ Telegram::Bot::Client.run(token) do |bot|
 
 	when '/unsubscribe'
 		chat_id = message.chat.id
-		unless redis.sismember('users', chat_id)
-			bot.api.sendMessage(chat_id: chat_id, text: "You aren't subscribed yet.",
-				reply_markup: custom_keyboard(redis, message.chat.id))
+		if redis.srem('users', chat_id)
+			bot.api.sendMessage(chat_id: chat_id, 
+					text: "You have been successfully unsubscribed.",
+					reply_markup: custom_keyboard(redis, message.chat.id))
+			File.open('users.dat', 'a+') { |file| file.write("OK: DEL #{chat_id}\n") }
 		else
-			if redis.srem('users', chat_id)
-				bot.api.sendMessage(chat_id: chat_id, 
-						text: "You have been successfully unsubscribed.",
-						reply_markup: custom_keyboard(redis, message.chat.id))
-			else
-				bot.api.sendMessage(chat_id: chat_id, text: "You aren't subscribed yet.",
-				reply_markup: custom_keyboard(redis, message.chat.id))
-			end
+			bot.api.sendMessage(chat_id: chat_id, text: "You aren't subscribed yet.",
+			reply_markup: custom_keyboard(redis, message.chat.id))
 		end
 
 	else
