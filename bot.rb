@@ -27,21 +27,23 @@ host = "pub-redis-16230.us-east-1-4.6.ec2.redislabs.com"
 port = 16230
 redis_pass = File.read('redis_pass.dat')
 
+url_random = "http://127.0.0.1:4567/random"
+
 redis = Redis.new(:host => host, :port => port, :password => redis_pass)
 
 
 Telegram::Bot::Client.run(token) do |bot|
   bot.listen do |message|
-    case message.text
+	case message.text
 
-    when '/start'
-      	bot.api.sendMessage(chat_id: message.chat.id, text: "Welcome to our Bash bot!", 
-      		reply_markup: custom_keyboard(redis, message.chat.id))
-    
-    when 'Random'
-      	bot.api.sendMessage(chat_id: message.chat.id, reply_markup: custom_keyboard(redis, message.chat.id), 
-      		text: parse_url("http://127.0.0.1:4567/random"))
-    
+	when '/start'
+		bot.api.sendMessage(chat_id: message.chat.id, text: "Welcome to our Bash bot!", 
+			reply_markup: custom_keyboard(redis, message.chat.id))
+
+	when 'Random'
+		bot.api.sendMessage(chat_id: message.chat.id, reply_markup: custom_keyboard(redis, message.chat.id), 
+			text: parse_url(url_random))
+
 	when 'Subscribe'
 		chat_id = message.chat.id
 
@@ -56,6 +58,6 @@ Telegram::Bot::Client.run(token) do |bot|
 	else
 		bot.api.sendMessage(chat_id: message.chat.id, text: "Unrecognized command", 
 			reply_markup: custom_keyboard(redis, message.chat.id))
-    end
+	end
   end
 end
