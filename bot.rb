@@ -21,10 +21,15 @@ Telegram::Bot::Client.run(token) do |bot|
     when '/subscribe'
     	chat_id = message.chat.id
     	if redis.sismember('users', chat_id)
-    		bot.api.sendMessage(chat_id: message.chat.id, text: "You are already subscribed")
+    		bot.api.sendMessage(chat_id: message.chat.id, text: "You are already subscribed.")
     	else
-    		redis.sadd('users', chat_id)
-    		File.open('users.dat', 'a+') { |file| file.write("OK: ADD #{chat_id}\n") }
+    		if redis.sadd('users', chat_id)
+    			bot.api.sendMessage(chat_id: message.chat.id, text: "You have been successfully subscribed.")
+    			File.open('users.dat', 'a+') { |file| file.write("OK: ADD #{chat_id}\n") }
+    		else
+    			bot.api.sendMessage(chat_id: message.chat.id, text: "Sorry, but something went wrong on our end.")
+    			File.open('users.dat', 'a+') { |file| file.write("ERROR: ADD #{chat_id}\n") }
+    		end
     	end
 
 	else
