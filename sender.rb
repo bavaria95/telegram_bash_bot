@@ -5,6 +5,22 @@ require 'telegram/bot'
 require 'oj'
 require 'redis'
 
+def custom_keyboard(redis, id)
+	if redis.sismember('users', id)
+			hints = Telegram::Bot::Types::ReplyKeyboardMarkup
+				.new(keyboard: [%w(Random)])
+	else
+		hints = Telegram::Bot::Types::ReplyKeyboardMarkup
+		.new(keyboard: [%w(Subscribe), %w(Random)])
+	end
+
+	hints
+end
+
+def parse_url url
+	Oj.load(open(url).read)
+end
+
 token = File.read('token.dat')
 host = "pub-redis-16230.us-east-1-4.6.ec2.redislabs.com"
 port = 16230
@@ -13,3 +29,10 @@ redis_pass = File.read('redis_pass.dat')
 url_random = "http://127.0.0.1:4567/best"
 
 redis = Redis.new(:host => host, :port => port, :password => redis_pass)
+
+
+Telegram::Bot::Client.run(token) do |bot|
+	bot.api.sendMessage(chat_id: "13491454", text: "Test", 
+			reply_markup: custom_keyboard(redis, "13491454"))
+
+end
