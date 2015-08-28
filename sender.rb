@@ -26,13 +26,20 @@ host = "pub-redis-16230.us-east-1-4.6.ec2.redislabs.com"
 port = 16230
 redis_pass = File.read('redis_pass.dat')
 
-url_random = "http://127.0.0.1:4567/best"
+url_today = "http://127.0.0.1:4567/today"
 
 redis = Redis.new(:host => host, :port => port, :password => redis_pass)
 
 
+quotes = parse_url(url_today)
+subscribed_users = redis.smembers('users')
+
 Telegram::Bot::Client.run(token) do |bot|
-	bot.api.sendMessage(chat_id: "13491454", text: "Test", 
-			reply_markup: custom_keyboard(redis, "13491454"))
+	subscribed_users.each do |user|
+		quotes.each do |quote|
+			bot.api.sendMessage(chat_id: user, text: quote, 
+					reply_markup: custom_keyboard(redis, user))
+		end
+	end
 
 end

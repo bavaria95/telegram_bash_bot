@@ -14,7 +14,7 @@ def parse_quotes url
 		quotes << x.css("div[class='text']").
 				children.map{|s| s.name == 'br' ? "\n" : s.text}.join
 	}
-	quotes.delete nil
+	quotes.delete ""
 
 	quotes
 end
