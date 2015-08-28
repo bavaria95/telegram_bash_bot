@@ -40,7 +40,8 @@ Telegram::Bot::Client.run(token) do |bot|
 		quotes.each do |quote|
 			if bot.api.sendMessage(chat_id: user, text: quote, 
 					reply_markup: custom_keyboard(redis, user))
-			redis.sadd('quotes', Digest::SHA1.hexdigest(quote))
+				redis.sadd('quotes', Digest::SHA1.hexdigest(quote))
+			end
 		end
 	end
 end
