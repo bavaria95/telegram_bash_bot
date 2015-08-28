@@ -38,9 +38,11 @@ subscribed_users = redis.smembers('users')
 Telegram::Bot::Client.run(token) do |bot|
 	subscribed_users.each do |user|
 		quotes.each do |quote|
-			if bot.api.sendMessage(chat_id: user, text: quote, 
-					reply_markup: custom_keyboard(redis, user))
-				redis.sadd('quotes', Digest::SHA1.hexdigest(quote))
+			unless redis.sismember('quotes', Digest::SHA1.hexdigest(quote))
+				if bot.api.sendMessage(chat_id: user, text: quote, 
+						reply_markup: custom_keyboard(redis, user))
+					redis.sadd('quotes', Digest::SHA1.hexdigest(quote))
+				end
 			end
 		end
 	end
