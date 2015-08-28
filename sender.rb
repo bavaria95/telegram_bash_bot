@@ -38,10 +38,22 @@ subscribed_users = redis.smembers('users')
 quotes = quotes.delete_if{|q| redis.sismember('quotes', Digest::SHA1.hexdigest(q))}
 quotes.each{|q| redis.sadd('quotes', Digest::SHA1.hexdigest(q))}
 
+gathered_quotes = []
+q_p = ""
+
+quotes.each do |q|
+	if (q_p + q).length < 4000		# limitations from telegram bot api(4096)
+		q_p = q_p + q + "\n\n_________________________________________________________________\n\n"
+	else
+		gathered_quotes << q_p
+		q_p = ""
+	end
+end
+
 Telegram::Bot::Client.run(token) do |bot|
 	subscribed_users.each do |user|
-		quotes.each do |quote|
-				bot.api.sendMessage(chat_id: user, text: quote, 
+		gathered_quotes.each do |q|
+			bot.api.sendMessage(chat_id: user, text: q, 
 						reply_markup: custom_keyboard(redis, user))
 		end
 	end
