@@ -35,15 +35,14 @@ redis = Redis.new(:host => host, :port => port, :password => redis_pass)
 quotes = parse_url(url_today)
 subscribed_users = redis.smembers('users')
 
+quotes = quotes.delete_if{|q| redis.sismember('quotes', Digest::SHA1.hexdigest(q))}
+quotes.each{|q| redis.sadd('quotes', Digest::SHA1.hexdigest(q))}
+
 Telegram::Bot::Client.run(token) do |bot|
 	subscribed_users.each do |user|
 		quotes.each do |quote|
-			unless redis.sismember('quotes', Digest::SHA1.hexdigest(quote))
-				if bot.api.sendMessage(chat_id: user, text: quote, 
+				bot.api.sendMessage(chat_id: user, text: quote, 
 						reply_markup: custom_keyboard(redis, user))
-					redis.sadd('quotes', Digest::SHA1.hexdigest(quote))
-				end
-			end
 		end
 	end
 end
