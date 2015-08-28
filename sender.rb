@@ -4,6 +4,7 @@ require 'open-uri'
 require 'telegram/bot'
 require 'oj'
 require 'redis'
+require 'digest/sha1'
 
 def custom_keyboard(redis, id)
 	if redis.sismember('users', id)
@@ -37,9 +38,9 @@ subscribed_users = redis.smembers('users')
 Telegram::Bot::Client.run(token) do |bot|
 	subscribed_users.each do |user|
 		quotes.each do |quote|
-			bot.api.sendMessage(chat_id: user, text: quote, 
+			if bot.api.sendMessage(chat_id: user, text: quote, 
 					reply_markup: custom_keyboard(redis, user))
+			redis.sadd('quotes', Digest::SHA1.hexdigest(quote))
 		end
 	end
-
 end
